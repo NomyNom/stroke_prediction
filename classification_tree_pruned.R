@@ -1,5 +1,6 @@
 library(tree)
 library(ROSE)   # for oversampling
+library(caret)
 
 # --- Preprocess Data ---
 data <- healthcare.dataset.stroke.data
@@ -51,6 +52,7 @@ plot(pruned_tree)
 text(pruned_tree, pretty = 0)
 
 mean_test_error <- mean(test_errors)
+confusionMatrix(preds, test$stroke)
 cat("Mean Test Prediction Error over 10 iterations:", round(mean_test_error, 4), "\n")
 
 
