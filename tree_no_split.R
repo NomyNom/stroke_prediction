@@ -46,3 +46,45 @@ recall <- cm["1", "1"] / sum(cm[ , "1"])  # Sensitivity for stroke
 cat("Accuracy:", accuracy, "\n")
 cat("Recall for stroke:", recall, "\n")
 
+
+
+
+
+# Prune the tree
+
+# Cross-validate to find optimal size
+set.seed(42)
+cv_results <- cv.tree(tree.model.bal, FUN = prune.misclass)
+
+# Plot cross-validation results
+plot(cv_results$size, cv_results$dev, type = "b",
+     xlab = "Tree Size (Number of Terminal Nodes)",
+     ylab = "Deviance (Misclassification Error)",
+     main = "Cross-Validation for Pruning")
+
+# Pick best size
+best_size <- cv_results$size[which.min(cv_results$dev)]
+cat("Optimal tree size:", best_size, "\n")
+
+# Prune the tree
+pruned_tree <- prune.tree(tree.model.bal, best = best_size)
+
+# Plot the pruned tree
+plot(pruned_tree)
+text(pruned_tree, pretty = 0)
+
+
+# Predict on test set
+pred_pruned <- predict(pruned_tree, test, type = "class")
+
+# Confusion matrix
+cm_pruned <- table(Predicted = pred_pruned, Actual = test$stroke)
+print(cm_pruned)
+
+# Accuracy and recall
+accuracy_pruned <- sum(diag(cm_pruned)) / sum(cm_pruned)
+recall_pruned <- ifelse("1" %in% colnames(cm_pruned), cm_pruned["1", "1"] / sum(cm_pruned[ , "1"]), 0)
+
+cat("Pruned Tree Accuracy:", round(accuracy_pruned, 4), "\n")
+cat("Pruned Tree Recall:", round(recall_pruned, 4), "\n")
+
